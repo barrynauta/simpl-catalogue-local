@@ -4,30 +4,56 @@ Standalone Docker Compose deployment of the Simpl-Open Catalogue backend service
 
 ## Purpose & Scope
 
-This deployment runs the Simpl-Open Federated Catalogue service and Advanced Search backend locally using Docker Compose, without requiring the full Simpl Kubernetes infrastructure.
+This deployment runs the **base Gaia-X Federated Catalogue** (fc-service) and Advanced Search backend (xfsc-advsearch-be) locally using Docker Compose, without requiring the full Simpl Kubernetes infrastructure.
 
-**What this deployment provides:**
-- ✅ Complete catalogue backend API (fc-service)
-- ✅ Advanced search functionality (xfsc-advsearch-be)
-- ✅ Neo4j graph database with semantic capabilities
-- ✅ PostgreSQL relational database
-- ✅ Local development and testing environment
+### What this deployment provides
 
-**What this deployment does NOT provide:**
-- ❌ Authentication/authorization (Keycloak)
-- ❌ Frontend UI components
-- ❌ EDC connectors or data plane services
-- ❌ Production-grade scalability or high availability
-- ❌ Integration with other Simpl-Open services (Notary, Compliance, etc.)
+✅ **Base Gaia-X Federated Catalogue** (fc-service)
+- Core catalogue database and search engine
+- Self-description publication and management
+- Syntax and semantic validation
+- Neo4j graph database with RDF/semantic capabilities
+- PostgreSQL relational database
 
-**Use cases:**
-- Local development and debugging
-- Integration testing
-- SC-3 co-development scenarios
-- Component behavior verification
-- API exploration and documentation
+✅ **Advanced Search Backend** (xfsc-advsearch-be)
+- Search indexing and query processing
+- API for search operations
 
-This deployment demonstrates that SC-1's Simpl-Open components are modular and can run independently of the full platform infrastructure.
+✅ **Local development environment**
+- Standalone deployment without Kubernetes
+- Interactive API documentation (Swagger UI)
+- Direct database access for debugging
+
+### What this deployment does NOT provide
+
+❌ **Full Simpl-Open Catalogue governance layer**
+- Catalogue Client Service (frontend/UI)
+- Query Mapper Adapter (search parameter translation)
+- Policy Filter Service (access control enforcement)
+- Quality Rule Validation Service (quality scoring)
+- Schema Registry integration
+- Management Service (advanced lifecycle operations)
+
+❌ **Other Simpl-Open services**
+- Authentication/authorization (Keycloak)
+- EDC connectors or data plane services
+- Notary services
+- Compliance services
+- Production-grade scalability or high availability
+
+### Use Cases
+
+- **Local development and debugging** - Develop and test catalogue integrations without full infrastructure
+- **Integration testing** - Validate catalogue API behavior and data models
+- **SC-3 co-development scenarios** - Test component interactions during parallel development
+- **Component behavior verification** - Understand how the base Gaia-X catalogue works
+- **API exploration** - Learn the catalogue API through Swagger UI documentation
+
+### Architecture Context
+
+This deployment provides the **foundational backend** - the core Gaia-X Federated Catalogue that Simpl-Open extends with additional governance, policy enforcement, and quality management layers. It demonstrates that SC-1's Simpl-Open components are modular and can run independently of the full platform infrastructure.
+
+For the complete Simpl-Open Catalogue architecture including governance components, see the [Simpl Programme documentation](https://simpl-programme.ec.europa.eu/).
 
 ## Prerequisites
 
