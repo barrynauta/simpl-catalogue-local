@@ -18,11 +18,12 @@ This deployment runs the Simpl-Open Federated Catalogue service and Advanced Sea
 - ❌ Frontend UI components
 - ❌ EDC connectors or data plane services
 - ❌ Production-grade scalability or high availability
-- ❌ Integration with other Simpl-Open services 
+- ❌ Integration with other Simpl-Open services (Notary, Compliance, etc.)
 
 **Use cases:**
 - Local development and debugging
 - Integration testing
+- SC-3 co-development scenarios
 - Component behavior verification
 - API exploration and documentation
 
@@ -90,6 +91,8 @@ curl http://localhost:8080/actuator/health
 | Service | URL | Purpose |
 |---------|-----|---------|
 | **fc-service API** | http://localhost:8081 | Federated Catalogue REST API |
+| **Swagger UI** | http://localhost:8081/swagger-ui/index.html | Interactive API documentation |
+| **OpenAPI Spec** | http://localhost:8081/v3/api-docs | OpenAPI 3.0 JSON specification |
 | **fc-service health** | http://localhost:8081/self-descriptions | Health check endpoint |
 | **Advanced Search** | http://localhost:8080 | Advanced search backend API |
 | **Neo4j Browser** | http://localhost:7474 | Graph database UI |
@@ -107,6 +110,9 @@ curl http://localhost:8081/schemas
 
 # List participants
 curl http://localhost:8081/participants
+
+# Open interactive API documentation in browser
+open http://localhost:8081/swagger-ui/index.html
 ```
 
 **xfsc-advsearch-be (port 8080):**
