@@ -23,7 +23,7 @@ services:
     container_name: catalogue-neo4j
     environment:
       - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4j}
-      - NEO4J_PLUGINS=["apoc", "graph-data-science", "n10s"]
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
@@ -101,6 +101,37 @@ services:
       timeout: 5s
       retries: 10
       start_period: 60s
+
+  catalogue-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.catalogue-client
+    image: catalogue-client
+    container_name: catalogue-client
+    environment:
+      - PUBLIC_AUTH_KEYCLOAK_SERVER_URL=
+      - PUBLIC_AUTH_KEYCLOAK_REALM=
+      - PUBLIC_AUTH_KEYCLOAK_CLIENT_ID=
+      - PUBLIC_SEARCH_API_URL=http://localhost:${ADVSEARCH_PORT:-8080}
+      - PUBLIC_SEARCH_API_VERSION=v1
+      - PUBLIC_CONTRACT_CONSUMPTION_API_URL=
+      - PUBLIC_CONTRACT_CONSUMPTION_API_VERSION=v1
+      - PUBLIC_AGENT_TYPE=consumer
+      - USE_MOCK_APIS=true
+      - HOST=0.0.0.0
+      - PORT=4321
+    ports:
+      - "${CATALOGUE_UI_PORT:-4321}:4321"
+    depends_on:
+      - xfsc-advsearch-be
+    networks:
+      - catalogue-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:4321/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 networks:
   catalogue-net:

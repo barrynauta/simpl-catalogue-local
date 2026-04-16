@@ -11,7 +11,7 @@ if [ -f .env.local ]; then
 fi
 
 # Create build directories
-mkdir -p build/fc-service build/xfsc-advsearch-be repos
+mkdir -p build/fc-service build/xfsc-advsearch-be build/catalogue-client repos
 
 # Clone or update repositories
 echo "→ Setting up repositories..."
@@ -21,6 +21,10 @@ fi
 
 if [ ! -d "repos/xfsc-advsearch-be" ]; then
     git clone https://code.europa.eu/simpl/simpl-open/development/data1/xfsc-advsearch-be.git repos/xfsc-advsearch-be
+fi
+
+if [ ! -d "repos/simpl-catalogue-client" ]; then
+    git clone https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-catalogue-client.git repos/simpl-catalogue-client
 fi
 
 # Build fc-service
@@ -43,6 +47,18 @@ mvn clean package -DskipTests=${BUILD_SKIP_TESTS:-true} -Dcheckstyle.skip=true
 cp target/xfsc-advsearch-be.jar ../../build/xfsc-advsearch-be/app.jar
 cd ../..
 
+# Build catalogue-client (Frontend UI)
+echo "→ Building catalogue-client..."
+cd repos/simpl-catalogue-client
+
+# Copy entire source to build directory for Docker
+cp -r . ../../build/catalogue-client/
+
+# Copy local environment configuration
+cp ../../.env.catalogue-client ../../build/catalogue-client/.env
+
+cd ../..
+
 # Start services
 echo "→ Starting services..."
 docker-compose up -d --build
@@ -55,6 +71,7 @@ echo "  - PostgreSQL:      localhost:${POSTGRES_PORT:-5432}"
 echo "  - Neo4j Browser:   http://localhost:${NEO4J_HTTP_PORT:-7474}"
 echo "  - fc-service:      http://localhost:${FC_SERVICE_PORT:-8081}"
 echo "  - advsearch:       http://localhost:${ADVSEARCH_PORT:-8080}"
+echo "  - catalogue-ui:    http://localhost:${CATALOGUE_UI_PORT:-4321}"
 echo ""
 echo "Check status:"
 echo "  docker ps"

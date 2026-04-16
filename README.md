@@ -4,7 +4,7 @@ Standalone Docker Compose deployment of the Simpl-Open Catalogue backend service
 
 ## Purpose & Scope
 
-This deployment runs the **base Gaia-X Federated Catalogue** (fc-service) and Advanced Search backend (xfsc-advsearch-be) locally using Docker Compose, without requiring the full Simpl Kubernetes infrastructure.
+This deployment runs the **base Gaia-X Federated Catalogue** (fc-service), Advanced Search backend (xfsc-advsearch-be), and **Catalogue Client UI** (simpl-catalogue-client) locally using Docker Compose, without requiring the full Simpl Kubernetes infrastructure.
 
 ### What this deployment provides
 
@@ -19,10 +19,17 @@ This deployment runs the **base Gaia-X Federated Catalogue** (fc-service) and Ad
 - Search indexing and query processing
 - API for search operations
 
+✅ **Catalogue Client UI** (simpl-catalogue-client)
+- Vue.js/Astro frontend application
+- Quick search and advanced search interfaces
+- Browse and query catalogue entries
+- **Authentication disabled** for local development
+
 ✅ **Local development environment**
 - Standalone deployment without Kubernetes
 - Interactive API documentation (Swagger UI)
 - Direct database access for debugging
+- Full UI for catalogue exploration
 
 ### What this deployment does NOT provide
 
@@ -116,13 +123,29 @@ curl http://localhost:8080/actuator/health
 
 | Service | URL | Purpose |
 |---------|-----|---------|
+| **Catalogue UI** | http://localhost:4321 | Web interface for catalogue search and browsing |
 | **fc-service API** | http://localhost:8081 | Federated Catalogue REST API |
 | **Swagger UI** | http://localhost:8081/swagger-ui/index.html | Interactive API documentation |
 | **OpenAPI Spec** | http://localhost:8081/v3/api-docs | OpenAPI 3.0 JSON specification |
-| **fc-service health** | http://localhost:8081/self-descriptions | Health check endpoint |
 | **Advanced Search** | http://localhost:8080 | Advanced search backend API |
 | **Neo4j Browser** | http://localhost:7474 | Graph database UI |
 | **PostgreSQL** | localhost:5432 | Database connection |
+
+### Using the Catalogue UI
+
+**Access the UI:**
+```bash
+# Open in your browser
+open http://localhost:4321
+```
+
+**Features:**
+- 🔍 **Quick Search** - Simple keyword search across catalogue
+- 🎯 **Advanced Search** - Filtered search with multiple criteria
+- 📋 **Browse Entries** - Explore all catalogue self-descriptions
+- 🔐 **No Authentication Required** - Keycloak authentication disabled for local development
+
+**Note:** The UI connects directly to your local backends (xfsc-advsearch-be on port 8080, which queries fc-service on port 8081).
 
 ### API Endpoints
 
@@ -156,6 +179,7 @@ curl http://localhost:8080/actuator/health
 
 | Service | Port | Purpose | Technology |
 |---------|------|---------|------------|
+| **catalogue-client** | 4321 | Web UI for search and browsing | Vue.js, Astro |
 | **fc-service** | 8081 | Federated Catalogue API | Java 17, Spring Boot |
 | **xfsc-advsearch-be** | 8080 | Advanced Search backend | Java 21, Spring Boot |
 | **PostgreSQL** | 5432 | Relational database | PostgreSQL 15 |
@@ -228,7 +252,9 @@ curl http://localhost:8080/actuator/health
 ### Service Dependencies
 
 ```
-PostgreSQL ←────┐
+                    Catalogue UI (4321)
+                           ↓
+PostgreSQL ←────┐          ↓
                  ├─── fc-service (8081)
 Neo4j ←─────────┘         ↓
                     xfsc-advsearch-be (8080)
@@ -309,7 +335,17 @@ The Dockerfiles use the appropriate `eclipse-temurin` base images.
 
 **Problem**: `docker ps` shows services as unhealthy, but APIs respond correctly.
 
-**Explanation**: Healthchecks may timeout due to initialization time. If the APIs respond to curl, the services are working. You can increase healthcheck timeouts in `docker-compose.yml` if needed.
+**Explanation**: Healthchecks may timeout due to initialization time. If the APIs/UI respond to curl/browser, the services are working.
+
+**Solution for fc-service healthcheck blocking UI startup:**
+```bash
+# If catalogue-client won't start due to fc-service being "unhealthy"
+docker start catalogue-client
+
+# The UI will start successfully even though fc-service is marked unhealthy
+```
+
+You can increase healthcheck timeouts in `docker-compose.yml` if needed, or remove healthchecks entirely for local development.
 
 ### Docker Compose doesn't read `.env.local`
 
@@ -323,17 +359,21 @@ The Dockerfiles use the appropriate `eclipse-temurin` base images.
 simpl-catalogue-local/
 ├── docker-compose.yml              # Service definitions
 ├── .env                           # Configuration
+├── .env.catalogue-client          # Catalogue UI configuration
 ├── start.sh                       # Build and deploy script
 ├── stop.sh                        # Cleanup script
 ├── Dockerfile.fc-service          # fc-service image (Java 17 + socat)
 ├── Dockerfile.xfsc-advsearch-be   # advsearch image (Java 21)
+├── Dockerfile.catalogue-client    # catalogue UI image (Node.js 22)
 ├── start-fc-service.sh            # fc-service startup with correct properties
-├── build/                         # Built JARs (generated)
+├── build/                         # Built artifacts (generated)
 │   ├── fc-service/app.jar
-│   └── xfsc-advsearch-be/app.jar
+│   ├── xfsc-advsearch-be/app.jar
+│   └── catalogue-client/          # Full frontend source for Docker build
 └── repos/                         # Git clones (generated)
     ├── simpl-fc-service/
-    └── xfsc-advsearch-be/
+    ├── xfsc-advsearch-be/
+    └── simpl-catalogue-client/
 ```
 
 ## Development
@@ -402,6 +442,7 @@ This deployment was created through extensive source code analysis when official
 3. **Three Neo4j plugins are required** (APOC, GDS, n10s - not just APOC)
 4. **fc-service hardcodes localhost:7687** (requires socat proxy pattern)
 5. **xfsc-advsearch-be needs Java 21** (not Java 17)
+6. **Catalogue-client authentication is optional** (empty Keycloak env vars disables auth completely)
 
 ## License
 
