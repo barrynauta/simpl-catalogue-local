@@ -1,0 +1,26 @@
+FROM eclipse-temurin:17-jre AS runtime
+
+# Install curl and socat for healthcheck and TCP proxy
+RUN apt-get update && apt-get install -y curl socat && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the JAR built by start.sh
+COPY build/fc-service/app.jar /app/app.jar
+
+# Copy startup script
+COPY start-fc-service.sh /app/start-fc-service.sh
+RUN chmod +x /app/start-fc-service.sh
+
+# Create directories for config and data
+RUN mkdir -p /app/config /app/schemas
+
+# Spring Boot uses PORT 8081 by default in our config
+EXPOSE 8081
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --retries=10 --start-period=60s \
+  CMD curl -f http://localhost:8081/actuator/health || exit 1
+
+# Start with our custom script
+ENTRYPOINT ["/app/start-fc-service.sh"]

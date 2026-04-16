@@ -1,0 +1,22 @@
+# Build artifacts
+build/
+repos/
+
+# Docker volumes
+postgres-data/
+neo4j-data/
+neo4j-logs/
+neo4j-plugins/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
